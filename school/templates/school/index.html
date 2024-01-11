@@ -1,0 +1,29 @@
+{% extends "school/layout.html" %}
+{% load static %}
+
+{% block body %}
+<div style="border-style: solid; border-width: 1px; border-color: darkgrey; padding: 10px; margin: 20px; text-align: center;">
+    <div id="new_course"> 
+        <h3>Welcome to the School Managment System!</h3>
+{%  if user.is_authenticated %}
+    {%  if request.user.role == user.TEACHER %}
+        <ul>
+            &#127891; <a href="{% url 'courses' %}">Create</a> and manage your courses and student groups<br>
+            &#127891; <a href="{% url 'enroll' %}">Browse open courses</a><br>
+            &#127891; <a href="{% url 'tprofile' id=request.user.id %}">Develop</a> your profile
+        </ul>        
+    {%  else %}
+        <ul>
+            &#127891; <a href="{% url 'enroll' %}">Enroll</a> into the courses<br>
+            &#127891; <a href="{% url 'stprofile' id=request.user.id %}">Develop</a> your profile
+        </ul>
+    {% endif %} 
+{% else %}
+    <a href="{% url 'register' %}"><h5>Register</a> or <a href="{% url 'login' %}">login</a> to enjoy all functions!</h5>
+{% endif %}
+</div>
+<img src="{% static 'school/img/index.jpeg' %}" width="100%">
+</div>
+{% endblock %}
+{% block script %}
+{% endblock %}

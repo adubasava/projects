@@ -1,0 +1,50 @@
+#new_course {
+    border-radius: 5px;
+    background-color:powderblue;
+    padding: 20px;
+}
+
+input[type=text], #description, select {
+    width: 100%;
+    padding: 10px 15px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid cadetblue;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=number] {
+    width: 20%;
+    padding: 10px 15px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid cadetblue;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type=submit] {
+    width: 100%;
+    background-color:lightseagreen;
+    color: white;
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+input[type=submit]:hover {
+    background-color:cadetblue;
+  }
+
+.mall {
+    padding: 1px 4px; 
+    font-size: 10px; 
+    background-color:crimson; 
+    border: none; 
+    border-radius: 4px; 
+    color: white;
+}
+

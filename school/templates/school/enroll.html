@@ -1,0 +1,153 @@
+{% extends "school/layout.html" %}
+{% load static %}
+
+{% block body %}
+<h5 style="padding-left: 10px;">Open registrations</h5>
+{% if enroll.count > 0 %}
+    <div style="border-style: solid; border-width: 1px; border-color: darkgrey; padding: 10px; margin: 20px;">
+        <div id="new_course">
+            <h5 style="padding-left: 10px;">Courses</h5>
+            <br>
+            <h6>Sort by:</h6>
+            <form action="{% url 'enroll' %}" method="POST">
+                {% csrf_token %}
+                <select class="form-select" name="sort">
+                    <option value="def" disabled selected>Your choice</option>
+                    <option value="popular">Popularity (from most popular)</option>
+                    <option value="recent">Course start date</option>
+                    <option value="title">Title</option>
+                    <option value="instructor">Instructor</option>
+                </select>
+                <input type="submit" value="Submit" name="sortsort">
+            </form>            
+            <div class="row">     
+                {% for en in enroll %}
+                <div class="col-sm-6">
+                    <div class="card" style="margin-bottom: 15px;">
+                        <div class="card-body">
+                            <h5 class="card-title">Course: <span style="color:#17a2b8"><a href="{% url 'course' id=en.course.id %}">{{ en.course.title }}</a></span></h5>
+                            <h6>Level: <span style="color:#17a2b8">{{ en.course.level }}</h6>
+                            <h6>Instructor: <span style="color:#17a2b8"><a href="{% url 'tprofile' id=en.course.user.id %}">{{ en.course.user.first_name }} {{ en.course.user.last_name }}</a></span></h6>
+                            <h6>Hours: <span style="color:#17a2b8">{{ en.course.hours }}</span></h6>
+                            <h6>Groups: 
+                            {% if en.group.all.count == 0 %}
+                                <span style="color:#17a2b8">No available groups right now</span> 
+                            {% else %}
+                                </h6>
+                                <ul>
+                                {% for g in en.group.all %}
+                                    {% if g.stud_current <  en.stud_max or en.stud_max == None %}
+                                        <li><span style="color:#17a2b8">{{ g.title }}</span> (already enrolled: <span style="color:#17a2b8">{{ g.stud_current }})</span></li>
+                                    {% endif %}
+                                {% endfor %}
+                                </ul>
+                            {% endif %}
+                            <h6>Registration is open  
+                                {% if en.enroll_start != None %}
+                                    from <span style="color:#17a2b8">{{ en.enroll_start}}</span>
+                                {% endif %}
+                                {% if en.enroll_end != None %}
+                                    till <span style="color:#17a2b8"> {{ en.enroll_end}}</span>
+                                {% endif %}
+                            </h6>
+                            <h6>Course duration: 
+                                {% if en.course_start == None and en.course_end == None %}
+                                    <span style="color:#17a2b8">flexible dates</span>
+                                {% endif %}
+                                {% if en.course_start != None %}
+                                    from <span style="color:#17a2b8">{{ en.course_start}}</span>
+                                {% endif %}
+                                {% if en.course_end != None %}
+                                    till <span style="color:#17a2b8">{{ en.course_end}}</span></h6>
+                                {% endif %}                                
+                                {% if en.stud_min != None %}
+                                    <h6>Minimal number of students <span style="font-size: smaller;">(in the group)</span>:
+                                    <span style="color:#17a2b8">{{ en.stud_min }}</span></h6>
+                                {% endif %}
+                                {% if en.stud_max != None %}
+                                    <h6>Maximal number of students <span style="font-size: smaller;">(in the group)</span>:
+                                    <span style="color:#17a2b8">{{ en.stud_max }}</span></h6>
+                                {% endif %} 
+                            <p class="card-text"><h6>Description</h6> <span style="color:#17a2b8">{{ en.course.description }}</span></p>
+                            {% if request.user.role == user.STUDENT and en.group.all.count != 0 %}
+                                <div class="d-flex justify-content-around">
+                                    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#register{{ en.id }}">Register</button>
+                                </div>
+                            {% endif %}
+                            {%  if user.is_authenticated and request.user == en.course.user %}
+                                <div class="d-flex justify-content-around">
+                                    <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#add{{ en.id }}">Add group</button>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="modal fade" id="register{{ en.id }}" tabindex="-1" role="dialog" aria-labelledby="register{{ en.id }}Label" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                    <h5 class="modal-title">Register for the course</h5>
+                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <label for="hgroup {{ en.id }}">Select group</label>            
+                                        <select id="hgroup {{ en.id }}" name="hgroup {{ en.id }}">
+                                            {% for g in en.group.all %}
+                                                {% if g.stud_current <  en.stud_max or en.stud_max == None %}
+                                                    <option value="{{ g.id }}">{{ g.title }}</option>
+                                                {% endif %}                                                
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
+                                    <button type="button" class="btn btn-primary" onclick="enrol('{{ en.id }}')" data-bs-dismiss="modal">Confirm</button>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+
+                            <div class="modal fade" id="add{{ en.id }}" tabindex="-1" role="dialog" aria-labelledby="add{{ en.id }}Label" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                    <h5 class="modal-title">Register for the course</h5>
+                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <span style="color:crimson">If there are no groups to select - first <a href="{% url 'course' id=en.course.id %}">create one</a></span><br><br>
+                                        <label for="ngroup {{ en.id }}">Select group</label>  
+                                        <select id="ngroup {{ en.id }}" name="ngroup {{ en.id }}" multiple>
+                                            {% for gr in groups %}
+                                                {% if gr.course == en.course and gr not in en.group.all %}
+                                                    <option value="{{ gr.id }}">{{ gr.title }}</option>
+                                                {% endif %}                                                
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="add_group_en('{{ en.id }}')">Confirm</button>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>    
+{% else %}
+    <h4 style="color:#17a2b8; margin: 20px;">There no available courses so far</h4>
+{% endif %}
+{% endblock %}
+{% block script %}
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    <script src="{% static 'school/enrol.js' %}"></script> 
+    <script src="{% static 'school/add_group_en.js' %}"></script> 
+{% endblock %}

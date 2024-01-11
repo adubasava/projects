@@ -1,0 +1,42 @@
+{% extends "school/layout.html" %}
+{% load static %}
+
+{% block body %}
+<div style="border-style: solid; border-width: 1px; border-color: darkgrey; padding: 10px; margin: 20px;">
+    <h4>Professor profile</h4>
+    <hr>
+    <img src="{% static 'school/img/prof.jpeg' %}" width="20%">
+    <hr>
+{% if user == request.user %}
+    You are 
+{% else %}
+    This is the page of Professor
+{% endif %}
+{{ user.first_name }} {{ user.last_name }}. 
+<hr>
+{% if user == request.user %}
+    Your 
+{% else %}
+    Professor's {{ user.first_name }} {{ user.last_name }}
+{% endif %} 
+courses:<br>
+{% if courses.count > 0 %}
+    <ul>    
+    {% for c in courses %}
+        <li style="list-style-type: '\1F393'"> {{ c.title }} (level: {{ c.level }}, hours: {{ c.hours }})
+        {% if user == request.user %}
+            <a href="{% url 'course' id=c.id %}"><button style="padding: 1px 4px; font-size: 10px; background-color:royalblue; border: none; border-radius: 2px; color: white;">Go to the course</button></a>
+        {% endif %}<br>
+    {% endfor %}
+    </ul>
+{% else %}
+    {% if user == request.user %}
+        <h4 style="color:#17a2b8; margin: 20px;">You have no courses yet. Create a course <a href="{% url 'courses' %}">here</a></h4>
+    {% endif %}
+{% endif %}
+<hr>
+</div>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'school/remove_stud.js' %}"></script>
+{% endblock %}

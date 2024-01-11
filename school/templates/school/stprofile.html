@@ -1,0 +1,48 @@
+{% extends "school/layout.html" %}
+{% load static %}
+
+{% block body %}
+<div style="border-style: solid; border-width: 1px; border-color: darkgrey; padding: 10px; margin: 20px;">
+    <h4>Student profile</h4>
+    <hr>
+    <img src="{% static 'school/img/stud.jpeg' %}" width="20%">
+    <hr>
+{% if user == request.user %}
+    You are 
+{% else %}
+    This is the page of
+{% endif %}
+{{ user.first_name }} {{ user.last_name }}. 
+<hr>
+{% if user == request.user %}
+    Your 
+{% else %}
+{{ user.first_name }}'s
+{% endif %} 
+groups:<br>
+<div >
+{% if student.count > 0 %}
+    <ul id="personal_courses">    
+    {% for s in student %}
+        <li style="list-style-type: '\1F393'" id="s {{ s.id }}"> {{ s.group.title }} (course: {{ s.group.course.title }}, level: {{ s.group.course.level }}, 
+        instructor: <a href="{% url 'tprofile' id=s.group.course.user.id %}">
+        {{ s.group.course.user.first_name }} {{ s.group.course.user.last_name }}) </a><br>
+        {% if user == request.user %}
+            <a href="{% url 'group' id=s.group.id %}">
+                <button style="padding: 1px 4px; font-size: 10px; background-color:#17a2b8; border: none; border-radius: 2px; color: white;">Go to the group page</button></a>
+            <button style="padding: 1px 4px; font-size: 10px; background-color:crimson; border: none; border-radius: 2px; color: white;" onclick="remove_stud('{{ s.id }}')">Leave the group</button>                  
+        {% endif %}<br>
+    {% endfor %}
+    </ul>
+{% else %}
+    {% if user == request.user %}
+        <h4 style="color:#17a2b8; margin: 20px;">You are not enrolled in any course. Check <a href="{% url 'enroll' %}">available courses</a></h4>
+    {% endif %}
+{% endif %}
+</div>
+<hr>
+</div>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'school/remove_stud2.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>{% block title %}School{% endblock %}</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+        <link href="{% static 'school/styles.css' %}" rel="stylesheet">
+        {% block script %}
+        {% endblock %}
+    </head>
+    <body>
+
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="{% url 'index' %}">School &#127891;</a>          
+            <div>
+              <ul class="navbar-nav mr-auto">
+                {% if user.is_authenticated and request.user.role == user.TEACHER %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'courses' %}">Your courses</a>
+                    </li>
+                {% endif %}
+                {%  if user.is_authenticated and request.user.role == user.STUDENT %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'enroll' %}">Enroll</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'stprofile' id=request.user.id %}">Your profile</a>
+                </li>
+                {% endif %}
+                {%  if user.is_authenticated and request.user.role == user.TEACHER %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'enroll' %}">Open registrations</a>
+                </li>  
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'tprofile' id=request.user.id %}">Your profile</a>
+                </li>
+                {% endif %}
+                {% if user.is_authenticated %}                    
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">Register</a>
+                    </li>
+                {% endif %}
+              </ul>
+            </div>
+          </nav>
+               
+        <div class="body">
+            {% block body %}
+            {% endblock %}
+        </div>
+        <footer> 
+            <div style="font-size: 10px; text-align: center; margin: 10px;">
+                Anzhalika Dubasava &copy; 2023-2024<br>
+                All images created with AI
+            </div>
+        </footer> 
+    </body>
+</html>

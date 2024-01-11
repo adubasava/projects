@@ -1,0 +1,133 @@
+{% extends "school/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <h5 style="padding-left: 10px;">Brief course description</h5>
+    <div style="border-style: solid; border-width: 1px; border-color: darkgrey; padding: 10px; margin: 20px; background-color:powderblue;">
+        <div class="card text-center">
+            <div id="e {{ course.id }}" style="display: none;">
+                <div class="card">
+                    <div class="card-body">
+                        <label for="t {{ course.id }}">Title:</label>
+                        <input type="text" id="t {{ course.id }}" name="title" value="{{ course.title }}" required>
+                        <label for="l {{ course.id }}">Level:</label>
+                        <input type="text" id="l {{ course.id }}" name="level" value="{{ course.level }}" required>
+                        <label for="h {{ course.id }}">Hours:</label>
+                        <input type="number" id="h {{ course.id }}" name="hours" value="{{ course.hours }}" required min="1" style="width: 30%; padding: 10px 15px; margin: 8px 0; display: inline-block; border: 1px solid cadetblue; border-radius: 4px; box-sizing: border-box;"><br>
+                        <label for="tx {{ course.id }}">Description:</label>
+                        <textarea width="100%" id="tx {{ course.id }}" name="description" required style="width: 100%; padding: 10px 15px; margin: 8px 0; display: inline-block; border: 1px solid cadetblue; border-radius: 4px; box-sizing: border-box;">{{ course.description }}</textarea>   
+                        <br>         
+                        <button class="btn btn-warning" id="s {{ course.id }}">Save course</button>                    
+                    </div>
+                </div>
+            </div>            
+            <div style="display: block;" id="o {{ course.id }}" >
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Title: <span id="t1 {{ course.id }}">{{ course.title }}</span></h5>
+                        <h6 class="card-subtitle">Level: <span id="l1 {{ course.id }}">{{ course.level }}</span></h6>
+                        {% if request.user != course.user %}
+                            <h6>Instructor: <a href="{% url 'tprofile' id=course.user.id %}">{{ course.user.first_name }} {{ course.user.last_name }}</a></h6>
+                        {% endif %}
+                        <h6>Hours: <span id="h1 {{ course.id }}">{{ course.hours }}</span></h6>
+                        <p class="card-text"><h6>Description</h6> <span id="tx1 {{ course.id }}">{{ course.description }}</span></p>                        
+                        {%  if user.is_authenticated and request.user.role == user.TEACHER and request.user == course.user  %}
+                            <button class="btn btn-info" id="{{ course.id }}">Edit</button><br><br>
+                            {% if enroll == 0 %}
+                                <center>
+                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#open{{ course.id }}" style="display: block;" id="openn {{ course.id }}" >Open for registration</button>
+                                    <button class="btn btn-danger" id="close {{ course.id }}" onclick="clos('{{ course.id }}')" style="display: none;">Close registration</button> 
+                                </center>
+                                {% else %}
+                                <center>
+                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#open{{ course.id }}" style="display: none;" id="openn {{ course.id }}">Open for registration</button>
+                                    <button class="btn btn-danger" id="close {{ course.id }}" onclick="clos('{{ course.id }}')" style="display: block;">Close registration</button>                           
+                                </center>
+                                {% endif %}
+                            <div style="display: none;" class="modal fade" id="open{{ course.id }}" tabindex="-1" role="dialog" aria-labelledby="course{{ en.id }}Label" aria-hidden="true">
+                                <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                    <h5 class="modal-title">Open registration</h5>
+                                    <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h6>All fields are optional except groups</h6>
+                                        <label for="start">Registration starts:</label>
+                                        <input type="date" id="start" name="start" style="width: 30%; padding: 10px 15px; margin: 8px 0; display: inline-block; border: 1px solid cadetblue; border-radius: 4px; box-sizing: border-box;"><br>
+                                        <label for="end">Registration ends:</label>
+                                        <input type="date" id="end" name="end" style="width: 30%; padding: 10px 15px; margin: 8px 0; display: inline-block; border: 1px solid cadetblue; border-radius: 4px; box-sizing: border-box;"><br>
+                                        <label for="start_course">Course starts:</label>
+                                        <input type="date" id="start_course" name="start_course" style="width: 30%; padding: 10px 15px; margin: 8px 0; display: inline-block; border: 1px solid cadetblue; border-radius: 4px; box-sizing: border-box;"><br>
+                                        <label for="end_course">Course ends:</label>
+                                        <input type="date" id="end_course" name="end_course" style="width: 30%; padding: 10px 15px; margin: 8px 0; display: inline-block; border: 1px solid cadetblue; border-radius: 4px; box-sizing: border-box;">  <br>                               
+                                        <label for="stud_min">Minimal number of students:</label>
+                                        <input type="number" id="stud_min" name="stud_min" min="1" style="width: 30%; padding: 10px 15px; margin: 8px 0; display: inline-block; border: 1px solid cadetblue; border-radius: 4px; box-sizing: border-box;"><br>
+                                        <label for="stud_max">Maximal number of students:</label>
+                                        <input type="number" id="stud_max" name="stud_max" min="1" style="width: 30%; padding: 10px 15px; margin: 8px 0; display: inline-block; border: 1px solid cadetblue; border-radius: 4px; box-sizing: border-box;"><br>
+                                        <label for="groups">Select groups</label>            
+                                        <select id="groups" name="groups" multiple>
+                                            {% for gr in groups %}
+                                                <option value="{{ gr.id }}">{{ gr.title }}</option>   
+                                            {% endfor %}                                                     
+                                        </select>
+                                        <span style="color:crimson">Please, re-check the informaion! <br>
+                                        After the course is opened for registration<br> 
+                                        you will be able only to add groups!</span>
+                                    </div>
+                                    <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close">Close</button>
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" onclick="ope('{{ course.id }}')">Confirm</button>
+                                    </div>
+                                </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {%  if user.is_authenticated and request.user.role == user.TEACHER and request.user == course.user %}
+    <hr>
+        <div style="border-style: solid; border-width: 1px; border-color: powderblue; padding: 10px; margin: 20px;">
+            <div style="display: block;" id="x {{ course.id }}">
+                <h5 style="padding-left: 10px;">Current groups</h5>     
+            {% if groups.count < 1 %}
+                No groups so far
+            {% else %}
+                <ul id="groups_personal">
+                {% for group in groups %}
+                    <li style="list-style-type: '\1F393'" id="gp {{ group.id }}">  <a href="{% url 'group' id=group.id %}">{{ group.title }}</a>                    
+                    {% if group.stud_current > 0 %}
+                        <button class="small" style="padding: 1px 4px; font-size: 10px; background-color:crimson; border: none; border-radius: 2px; color: white;" id="rm {{ group.id }}" onclick="remove_gr_s()">Remove</button>                    
+                    {% else %}
+                        <button class="small" style="padding: 1px 4px; font-size: 10px; background-color:crimson; border: none; border-radius: 2px; color: white;" id="rm {{ group.id }}" onclick="remove_gr('{{ group.id }}')">Remove</button>                    
+                    {% endif %}
+                    <br>
+                {% endfor %}
+                </ul>
+            {% endif %}<br>            
+            <button class="btn btn-outline-info" id="{{ course.id }}">Add group</button>
+            </div>
+            <div style="display: none;" id="gh {{course.id}}"><hr> 
+                <span style="color:crimson; font-size: smaller;">Note: empty and already existing (inside the course) titles will be ignored</span><br>
+                <label for="gtitle">Title:</label>
+                <input type="text" id="gtitle" name="gtitle">      
+                <button class="btn btn-outline-success" id="g {{ course.id }}">Add</button>
+            </div>
+    </div>
+    {% endif %}
+{% endblock %}
+{% block script %}
+    <script defer src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    <script src="{% static 'school/edit.js' %}"></script>
+    <script defer src="{% static 'school/clos.js' %}"></script>
+    <script defer src="{% static 'school/ope.js' %}"></script>
+    <script src="{% static 'school/add_group.js' %}"></script>
+    <script src="{% static 'school/remove_gr.js' %}"></script>    
+    <script src="{% static 'school/remove_gr_s.js' %}"></script>
+{% endblock %}

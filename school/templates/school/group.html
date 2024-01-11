@@ -1,0 +1,102 @@
+{% extends "school/layout.html" %}
+{% load static %}
+
+{% block body %}
+    <h5 style="padding-left: 10px;">Course</h5>
+    <div style="border-style: solid; border-width: 1px; border-color: darkgrey; padding: 10px; margin: 20px; background-color:powderblue;">        
+        <div class="card text-center">        
+            <div style="display: block;" id="o {{ course.id }}" >
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Title: <span id="t1 {{ course.id }}">{{ course.title }}</span></h5>
+                        <h6 class="card-subtitle">Level: <span id="l1 {{ course.id }}">{{ course.level }}</span></h6>
+                        {% if request.user != course.user %}
+                            <h6>Instructor: <a href="{% url 'tprofile' id=course.user.id %}">{{ course.user.first_name }} {{ course.user.last_name }}</a></h6>
+                        {% endif %}
+                        <h6>Hours: <span id="h1 {{ course.id }}">{{ course.hours }}</span></h6>
+                        <p class="card-text"><h6>Description</h6> <span id="tx1 {{ course.id }}">{{ course.description }}</span></p>                        
+                        {%  if user.is_authenticated and request.user.role == user.TEACHER and request.user == course.user %}
+                            <a href="{% url 'course' id=course.id %}" class="btn btn-primary">Go to the course</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr>
+    {%  if user.is_authenticated and request.user.role == user.TEACHER and request.user == course.user %}
+        <div style="border-style: solid; border-width: 1px; border-color: powderblue; padding: 10px; margin: 20px;">
+            <div style="display: block;" id="ab {{ group.id }}">
+                <h5 style="padding-left: 10px;">Group: <span id="grt {{ group.id}}">{{ group.title}}</span></h5>
+                <button class="btn btn-success" id="{{ group.id }}">Edit</button><br>
+            </div>
+            <div style="display: none;" id="bc {{group.id}}"><hr>             
+                <span style="color:crimson; font-size: smaller;">Note: empty and already existing (inside the course) titles will be ignored</span><br>
+                <label for="gtitle">New title:</label>
+                <input type="text" id="gtitle" name="gtitle" value="{{ group.title }}">      
+                <button class="btn btn-warning" id="bcd {{ group.id }}">Save</button>
+            </div>
+        </div>
+        <hr>
+        <div style="border-style: solid; border-width: 1px; border-color: powderblue; padding: 10px; margin: 20px;">
+
+            <div style="display: block;" id="i {{ group.id}}">
+                <h5 style="padding-left: 10px;">Students:</h5>
+                {% if students.count < 1 %}
+                    No students so far<br>
+                {% else %}
+                    <ul class="stlist" id="group_students">              
+                    {% for student in students %}
+                    <li style="list-style-type: '\1F393'" id="stud {{ student.id }}"> <a href="{% url 'stprofile' id=student.user.id %}">{{ student.user.first_name }} {{ student.user.last_name }}</a> <button class="small" style="padding: 1px 4px; font-size: 10px; background-color:crimson; border: none; border-radius: 2px; color: white;" id="r {{ student.id }}" onclick="remove_stud('{{ student.id }}')">Remove</button><br>
+                    {% endfor %}
+                    </ul>
+                {% endif %}            
+                <button class="btn btn-outline-info" id="{{ group.id }}">Add student</button>
+            </div>
+            <div style="display: none;" id="k {{group.id}}"><hr>        
+                {% if students.count == all_students.count %}
+                    <span style="color:crimson">No available students. Refresh the page</span>
+                {% else %}
+                    <label for="student">Student</label>            
+                        <select id="student" name="student">
+                            {% for stud in unenroll %}    
+                                    <option value="{{ stud.id }}">{{ stud.first_name }} {{ stud.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button class="btn btn-outline-success" id="n {{ group.id }}">Add</button>
+                {% endif %} 
+    {% elif user.is_authenticated and request.user.role == user.TEACHER and request.user != course.user %}
+        <center>
+            <span style=color:crimson>You can view only your own groups </span>
+        </center>   
+    <hr>
+    {% else %}
+        <div style="border-style: solid; border-width: 1px; border-color: powderblue; padding: 10px; margin: 20px;">
+            <div style="display: block;" id="ab {{ group.id }}">
+                <h5 style="padding-left: 10px;">Group: <span id="grt {{ group.id}}">{{ group.title}}</span></h5>
+            </div>            
+        </div>
+        <hr>
+        <div style="border-style: solid; border-width: 1px; border-color: powderblue; padding: 10px; margin: 20px;">
+
+            <div style="display: block;" id="i {{ group.id}}">
+                <h5 style="padding-left: 10px;">Students:</h5>
+                {% if students.count < 1 %}
+                    No students so far<br>
+                {% else %}
+                    <ul class="stlist" id="group_students">              
+                    {% for student in students %}
+                    <li style="list-style-type: '\1F393'" id="stud {{ student.id }}"> <a href="{% url 'stprofile' id=student.user.id %}">{{ student.user.first_name }} {{ student.user.last_name }}</a>
+                    {% endfor %}
+                    </ul>
+                {% endif %} 
+            </div>
+    {% endif %}
+            </div>  
+        </div>
+{% endblock %}
+{% block script %}
+    <script src="{% static 'school/add.js' %}"></script>
+    <script src="{% static 'school/remove_stud.js' %}"></script>
+    <script src="{% static 'school/edit_gr.js' %}"></script>
+{% endblock %}
